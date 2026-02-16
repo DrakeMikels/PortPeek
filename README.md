@@ -2,12 +2,6 @@
 
 PortPeek is a macOS menu bar app that monitors local development ports, shows which process is listening, and gives one-click actions to open endpoints or stop stuck processes.
 
-## Project Description
-
-Use this in your GitHub repository **About** field:
-
-`macOS menu bar app for monitoring local development ports and managing listeners`
-
 ## What It Does
 
 - Monitors a configurable list of local ports (defaults include 3000, 5173, 8080, 5432, etc.)
@@ -37,67 +31,6 @@ Use this in your GitHub repository **About** field:
 
 - Some ports (for example `5000`) may be used by macOS services (for example ControlCenter). Those may not be browser endpoints.
 - Browser access returning `403` means the service responded, but denied the request. It does not mean port detection is wrong.
-
-## Homebrew Distribution (Cask)
-
-PortPeek is a GUI app, so distribute it through a Homebrew **cask**.
-
-### User Install
-
-```bash
-brew tap <owner>/<tap-repo>
-brew install --cask portpeek
-```
-
-### Maintainer Release Flow
-
-1. Push code to GitHub.
-2. Create and push a version tag:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-3. GitHub Actions builds release artifacts and uploads:
-- `PortPeek.app.zip`
-- `PortPeek-1.0.0.dmg`
-- `SHA256SUMS.txt`
-
-4. Generate cask file from SHA:
-
-```bash
-./scripts/generate_cask.sh 1.0.0 <owner> <source-repo> <sha256> /tmp/portpeek.rb
-```
-
-5. Copy generated cask into your tap repo at `Casks/portpeek.rb`, commit, and push.
-
-### One-Command Local Brew Prep
-
-If you already have a local tap repo clone:
-
-```bash
-./scripts/prepare_brew_release.sh 1.0.0 <owner> <source-repo> <path-to-homebrew-tap>
-```
-
-This will:
-- build `dist/PortPeek.app.zip`
-- compute SHA256
-- write `Casks/portpeek.rb` into your tap repo
-
-### Manual Packaging (Local)
-
-Build zip for releases:
-
-```bash
-./scripts/package_release.sh 1.0.0
-```
-
-Build DMG:
-
-```bash
-./scripts/package_dmg.sh 1.0.0
-```
 
 ## Repository Layout
 
