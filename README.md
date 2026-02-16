@@ -1,6 +1,12 @@
 # PortPeek
 
-PortPeek is a lightweight macOS menu bar app for tracking local development ports and the processes listening on them.
+PortPeek is a macOS menu bar app that monitors local development ports, shows which process is listening, and gives one-click actions to open endpoints or stop stuck processes.
+
+## Project Description
+
+Use this in your GitHub repository **About** field:
+
+`macOS menu bar app for monitoring local development ports and managing listeners`
 
 ## What It Does
 
