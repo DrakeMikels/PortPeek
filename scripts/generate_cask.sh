@@ -22,7 +22,7 @@ cask "portpeek" do
 
   url "https://github.com/${OWNER}/${SOURCE_REPO}/releases/download/v#{version}/PortPeek.app.zip"
   name "PortPeek"
-  desc "Menu bar utility for monitoring local development ports"
+  desc "Monitor local development ports from the macOS menu bar"
   homepage "https://github.com/${OWNER}/${SOURCE_REPO}"
 
   depends_on macos: ">= :ventura"
@@ -31,4 +31,3 @@ end
 EOF
 
 echo "Cask written to: ${OUTPUT_PATH}"
-
