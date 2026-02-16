@@ -2,6 +2,40 @@
 
 PortPeek should be distributed as a Homebrew cask.
 
+## Public Distribution Requirements
+
+To avoid macOS Gatekeeper "app is damaged" warnings for users, releases must be:
+- signed with **Developer ID Application**
+- notarized with Apple Notary service
+- stapled before publishing assets
+
+The release workflow is configured to do this automatically.
+
+### Required GitHub Secrets
+
+Add these repo secrets in GitHub Settings -> Secrets and variables -> Actions:
+
+- `MACOS_CERTIFICATE_P12_BASE64`
+: base64 of your Developer ID Application `.p12` file
+- `MACOS_CERTIFICATE_PASSWORD`
+: password used when exporting the `.p12`
+- `MACOS_KEYCHAIN_PASSWORD`
+: any strong temporary password for the CI keychain
+- `MACOS_SIGNING_IDENTITY`
+: full signing identity string, e.g. `Developer ID Application: Your Name (TEAMID)`
+- `NOTARY_KEY_ID`
+: App Store Connect API key ID
+- `NOTARY_ISSUER_ID`
+: App Store Connect issuer ID
+- `NOTARY_API_KEY_P8`
+: full contents of `AuthKey_<KEY_ID>.p8`
+
+Example to produce `MACOS_CERTIFICATE_P12_BASE64` locally:
+
+```bash
+base64 -i DeveloperID_Application.p12 | pbcopy
+```
+
 ## Project Description
 
 Suggested GitHub repository About text:
