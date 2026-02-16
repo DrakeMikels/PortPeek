@@ -1,0 +1,10 @@
+.DS_Store
+DerivedData/
+build/
+dist/
+
+*.xcuserstate
+*.moved-aside
+
+PortPeek.xcodeproj/xcuserdata/
+

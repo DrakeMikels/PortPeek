@@ -6,13 +6,47 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		272A6C732F42B2D500CDDBBB /* PortPeekApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272A6C722F42B2D500CDDBBB /* PortPeekApp.swift */; };
+		274B216B2F42A3B700C87764 /* PortInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 274B216A2F42A3B700C87764 /* PortInfo.swift */; };
+		274B216D2F42A3C100C87764 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 274B216C2F42A3C100C87764 /* Preferences.swift */; };
+		274B216F2F42A3D200C87764 /* PortScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 274B216E2F42A3D200C87764 /* PortScanner.swift */; };
+		274B21712F42A3DE00C87764 /* ProcessKiller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 274B21702F42A3DE00C87764 /* ProcessKiller.swift */; };
+		274B21732F42A3FC00C87764 /* MenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 274B21722F42A3FC00C87764 /* MenuBuilder.swift */; };
+		274B21752F42A41600C87764 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 274B21742F42A41600C87764 /* AppDelegate.swift */; };
+		274B21842F42AF6000C87764 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 274B21832F42AF6000C87764 /* Info.plist */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		272A6C722F42B2D500CDDBBB /* PortPeekApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortPeekApp.swift; sourceTree = "<group>"; };
 		274B21532F42A1C400C87764 /* PortPeek.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PortPeek.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		274B21612F42A1CE00C87764 /* prd.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = prd.md; sourceTree = "<group>"; };
+		274B21682F42A3AB00C87764 /* DEVLOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEVLOG.md; sourceTree = "<group>"; };
+		274B216A2F42A3B700C87764 /* PortInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortInfo.swift; sourceTree = "<group>"; };
+		274B216C2F42A3C100C87764 /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
+		274B216E2F42A3D200C87764 /* PortScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortScanner.swift; sourceTree = "<group>"; };
+		274B21702F42A3DE00C87764 /* ProcessKiller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessKiller.swift; sourceTree = "<group>"; };
+		274B21722F42A3FC00C87764 /* MenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBuilder.swift; sourceTree = "<group>"; };
+		274B21742F42A41600C87764 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		274B21832F42AF6000C87764 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		274B21822F42AB9700C87764 /* Exceptions for "PortPeek" folder in "PortPeek" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 274B21522F42A1C400C87764 /* PortPeek */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		274B21552F42A1C400C87764 /* PortPeek */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				274B21822F42AB9700C87764 /* Exceptions for "PortPeek" folder in "PortPeek" target */,
+			);
 			path = PortPeek;
 			sourceTree = "<group>";
 		};
@@ -34,6 +68,16 @@
 			children = (
 				274B21552F42A1C400C87764 /* PortPeek */,
 				274B21542F42A1C400C87764 /* Products */,
+				274B21612F42A1CE00C87764 /* prd.md */,
+				274B21682F42A3AB00C87764 /* DEVLOG.md */,
+				274B216A2F42A3B700C87764 /* PortInfo.swift */,
+				274B216C2F42A3C100C87764 /* Preferences.swift */,
+				274B216E2F42A3D200C87764 /* PortScanner.swift */,
+				274B21702F42A3DE00C87764 /* ProcessKiller.swift */,
+				274B21722F42A3FC00C87764 /* MenuBuilder.swift */,
+				274B21742F42A41600C87764 /* AppDelegate.swift */,
+				274B21832F42AF6000C87764 /* Info.plist */,
+				272A6C722F42B2D500CDDBBB /* PortPeekApp.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -79,6 +123,7 @@
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
+				ORGANIZATIONNAME = LogicFlow;
 				TargetAttributes = {
 					274B21522F42A1C400C87764 = {
 						CreatedOnToolsVersion = 26.2;
@@ -109,6 +154,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				274B21842F42AF6000C87764 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +165,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				274B21732F42A3FC00C87764 /* MenuBuilder.swift in Sources */,
+				274B21752F42A41600C87764 /* AppDelegate.swift in Sources */,
+				274B216D2F42A3C100C87764 /* Preferences.swift in Sources */,
+				274B216B2F42A3B700C87764 /* PortInfo.swift in Sources */,
+				274B21712F42A3DE00C87764 /* ProcessKiller.swift in Sources */,
+				274B216F2F42A3D200C87764 /* PortScanner.swift in Sources */,
+				272A6C732F42B2D500CDDBBB /* PortPeekApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,16 +307,19 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 247BZ2D7WF;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = logicflow.PortPeek;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -286,16 +342,19 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 247BZ2D7WF;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = logicflow.PortPeek;
 				PRODUCT_NAME = "$(TARGET_NAME)";

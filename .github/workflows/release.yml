@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Release Artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          DERIVED_DIR="${RUNNER_TEMP}/DerivedData"
+          APP_PATH="${DERIVED_DIR}/Build/Products/Release/PortPeek.app"
+          DIST_DIR="${GITHUB_WORKSPACE}/dist"
+
+          mkdir -p "${DIST_DIR}"
+
+          xcodebuild \
+            -project "${GITHUB_WORKSPACE}/PortPeek.xcodeproj" \
+            -scheme PortPeek \
+            -configuration Release \
+            -derivedDataPath "${DERIVED_DIR}" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+          if [[ ! -d "${APP_PATH}" ]]; then
+            echo "Build output missing: ${APP_PATH}"
+            exit 1
+          fi
+
+          ditto -c -k --keepParent "${APP_PATH}" "${DIST_DIR}/PortPeek.app.zip"
+
+          STAGING_DIR="${RUNNER_TEMP}/dmg-staging"
+          rm -rf "${STAGING_DIR}"
+          mkdir -p "${STAGING_DIR}"
+          cp -R "${APP_PATH}" "${STAGING_DIR}/"
+          ln -s /Applications "${STAGING_DIR}/Applications"
+
+          hdiutil create \
+            -volname "PortPeek" \
+            -srcfolder "${STAGING_DIR}" \
+            -ov \
+            -format UDZO \
+            "${DIST_DIR}/PortPeek-${VERSION}.dmg"
+
+          shasum -a 256 "${DIST_DIR}/PortPeek.app.zip" "${DIST_DIR}/PortPeek-${VERSION}.dmg" > "${DIST_DIR}/SHA256SUMS.txt"
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/PortPeek.app.zip
+            dist/PortPeek-*.dmg
+            dist/SHA256SUMS.txt
+
