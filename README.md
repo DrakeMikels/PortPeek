@@ -63,17 +63,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The workflow requires these repository secrets to be configured (Settings → Secrets and variables → Actions):
-
-| Secret | Description |
-|---|---|
-| `MACOS_CERTIFICATE_P12_BASE64` | Base64-encoded Developer ID Application `.p12` |
-| `MACOS_CERTIFICATE_PASSWORD` | Password for the `.p12` |
-| `MACOS_KEYCHAIN_PASSWORD` | Temporary keychain password used during CI |
-| `MACOS_SIGNING_IDENTITY` | Full signing identity, e.g. `Developer ID Application: Your Name (TEAMID)` |
-| `NOTARY_KEY_ID` | App Store Connect API key ID |
-| `NOTARY_ISSUER_ID` | App Store Connect issuer ID |
-| `NOTARY_API_KEY_P8` | Contents of `AuthKey_<KEY_ID>.p8` |
+See [`packaging/homebrew/README.md`](packaging/homebrew/README.md) for the required secrets setup and Homebrew tap distribution.
 
 ### Project Layout
 

@@ -8,3 +8,7 @@ dist/
 
 PortPeek.xcodeproj/xcuserdata/
 
+.claude/
+prd.md
+DEVLOG.md
+
