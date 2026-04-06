@@ -1,45 +1,90 @@
 # PortPeek
 
-PortPeek is a macOS menu bar app that monitors local development ports, shows which process is listening, and gives one-click actions to open endpoints or stop stuck processes.
+A macOS menu bar app for monitoring local development ports. See what's running, open it in your browser, or kill it — without leaving the menu bar.
+
+## Install
+
+1. Download `PortPeek-*.dmg` from the [latest release](../../releases/latest)
+2. Open the DMG and drag PortPeek to Applications
+3. Launch PortPeek — the ⚡︎ icon appears in your menu bar
+
+> **macOS 13.5 or later required.**
+> On first launch, macOS may ask you to confirm opening an app downloaded from the internet. This is expected — the app is signed and notarized by Apple.
 
 ## What It Does
 
-- Monitors a configurable list of local ports (defaults include 3000, 5173, 8080, 5432, etc.)
-- Shows active listeners in the menu bar
-- Lets you open a port in your default browser
-- Lets you copy `host:port`
-- Lets you terminate processes (SIGTERM/SIGKILL) when PID is available
+Click the ⚡︎ icon to see all active listeners on your watched ports. Each entry shows the port number and process name. Hover over a port for more detail and actions:
 
-## Requirements
+- **Open in Browser** — opens `http://localhost:<port>` in your default browser
+- **Copy Host:Port** — copies `localhost:<port>` to your clipboard
+- **Kill Process (SIGTERM)** — gracefully stops the process
+- **Force Kill (SIGKILL)** — immediately terminates it if SIGTERM didn't work
 
-- macOS 13.5+
-- Xcode 15+
+The menu also shows PID, user, and protocol (TCP/UDP) for each active port.
 
-## Run Locally
+The menu refreshes automatically in the background and also rescans every time you open it.
 
-1. Open `PortPeek.xcodeproj` in Xcode.
-2. Select scheme `PortPeek`.
-3. Run (`Cmd+R`).
-4. Use the menu bar icon to inspect active ports.
+## Default Watched Ports
+
+3000, 3001, 4000, 5000, 5173, 5432, 6379, 8000, 8080, 9200, 15672, 27017
+
+These cover common dev servers, databases, and message brokers (Vite, Rails, Django, Postgres, Redis, Elasticsearch, RabbitMQ, MongoDB).
 
 ## Settings
 
-- `Settings...` lets you configure watched ports and refresh interval.
-- Watched ports now support multiline input (6 rows): one port per line or comma-separated.
+Open **Settings…** from the menu (or press `,`) to configure:
+
+- **Watched Ports** — the list of ports to scan. Enter one per line or comma-separated.
+- **Refresh Interval** — how often to scan in the background (seconds). Default is 5.
+- **Show Inactive Ports** — when enabled, ports you're watching that have nothing running are shown in the menu as greyed-out entries.
+
+Use **Reset to Defaults** to restore the original port list and interval.
 
 ## Notes
 
-- Some ports (for example `5000`) may be used by macOS services (for example ControlCenter). Those may not be browser endpoints.
-- Browser access returning `403` means the service responded, but denied the request. It does not mean port detection is wrong.
+- Port 5000 is used by macOS ControlCenter on some systems. It will show as active even when you have nothing running on it.
+- A `403` response from "Open in Browser" means the service is running and responded — it just denied the request. Port detection is working correctly.
 
-## Repository Layout
+---
 
-- `AppDelegate.swift` - app lifecycle and menu orchestration
-- `PortScanner.swift` - listener detection
-- `MenuBuilder.swift` - dynamic menu UI
-- `PortPeek/SettingsWindowController.swift` - settings window UI
-- `scripts/package_release.sh` - release zip + SHA helper
-- `scripts/package_dmg.sh` - release DMG helper
-- `scripts/generate_cask.sh` - generate Homebrew cask file from version/SHA
-- `packaging/homebrew/portpeek.rb.template` - cask template
-- `.github/workflows/release.yml` - GitHub tag release automation
+## Contributing
+
+**Requirements:** macOS 13.5+, Xcode 15+
+
+1. Clone the repo and open `PortPeek.xcodeproj`
+2. Select the `PortPeek` scheme and press `Cmd+R`
+
+### Release Pipeline
+
+Releases are built, signed, notarized, and published automatically by GitHub Actions when a version tag is pushed.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow requires these repository secrets to be configured (Settings → Secrets and variables → Actions):
+
+| Secret | Description |
+|---|---|
+| `MACOS_CERTIFICATE_P12_BASE64` | Base64-encoded Developer ID Application `.p12` |
+| `MACOS_CERTIFICATE_PASSWORD` | Password for the `.p12` |
+| `MACOS_KEYCHAIN_PASSWORD` | Temporary keychain password used during CI |
+| `MACOS_SIGNING_IDENTITY` | Full signing identity, e.g. `Developer ID Application: Your Name (TEAMID)` |
+| `NOTARY_KEY_ID` | App Store Connect API key ID |
+| `NOTARY_ISSUER_ID` | App Store Connect issuer ID |
+| `NOTARY_API_KEY_P8` | Contents of `AuthKey_<KEY_ID>.p8` |
+
+### Project Layout
+
+| File | Purpose |
+|---|---|
+| `AppDelegate.swift` | App lifecycle, menu orchestration, timer |
+| `PortScanner.swift` | Port listener detection |
+| `MenuBuilder.swift` | Dynamic menu UI |
+| `PortPeek/SettingsWindowController.swift` | Settings window |
+| `Preferences.swift` | UserDefaults persistence |
+| `PortInfo.swift` | Port data model |
+| `ProcessKiller.swift` | SIGTERM/SIGKILL implementation |
+| `.github/workflows/release.yml` | Automated release workflow |
+| `scripts/` | Local packaging helpers |
