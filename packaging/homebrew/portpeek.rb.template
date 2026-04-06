@@ -2,10 +2,10 @@ cask "portpeek" do
   version "1.0.0"
   sha256 "REPLACE_WITH_SHA256"
 
-  url "https://github.com/REPLACE_OWNER/REPLACE_SOURCE_REPO/releases/download/v#{version}/PortPeek.app.zip"
+  url "https://github.com/DrakeMikels/PortPeek/releases/download/v#{version}/PortPeek.app.zip"
   name "PortPeek"
   desc "Monitor local development ports from the macOS menu bar"
-  homepage "https://github.com/REPLACE_OWNER/REPLACE_SOURCE_REPO"
+  homepage "https://github.com/DrakeMikels/PortPeek"
 
   depends_on macos: ">= :ventura"
   app "PortPeek.app"
