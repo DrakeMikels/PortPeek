@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build-sign-submit:
     runs-on: macos-latest
 
     steps:
@@ -50,7 +50,6 @@ jobs:
               missing+=("${key}")
             fi
           done
-
           if [[ ${#missing[@]} -gt 0 ]]; then
             echo "::error::Missing required GitHub Actions secrets: ${missing[*]}"
             exit 1
@@ -78,10 +77,10 @@ jobs:
           CURRENT_KEYCHAINS=$(security list-keychains -d user | tr -d '"')
           security list-keychains -d user -s "${KEYCHAIN_PATH}" ${CURRENT_KEYCHAINS}
           security default-keychain -d user -s "${KEYCHAIN_PATH}"
-
           security find-identity -v -p codesigning "${KEYCHAIN_PATH}"
 
-      - name: Build, Sign, Notarize, and Package
+      - name: Build, Sign, and Submit for Notarization
+        id: build
         shell: bash
         env:
           MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
@@ -93,13 +92,12 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           DERIVED_DIR="${RUNNER_TEMP}/DerivedData"
           APP_PATH="${DERIVED_DIR}/Build/Products/Release/PortPeek.app"
-          DIST_DIR="${GITHUB_WORKSPACE}/dist"
+          SIGNED_ZIP="${RUNNER_TEMP}/PortPeek-signed.zip"
           NOTARY_KEY_PATH="${RUNNER_TEMP}/AuthKey_${NOTARY_KEY_ID}.p8"
-          APP_NOTARY_ZIP="${RUNNER_TEMP}/PortPeek-notary.zip"
 
-          mkdir -p "${DIST_DIR}"
           printf '%s' "${NOTARY_API_KEY_P8}" > "${NOTARY_KEY_PATH}"
 
+          echo "==> Building"
           xcodebuild \
             -project "${GITHUB_WORKSPACE}/PortPeek.xcodeproj" \
             -scheme PortPeek \
@@ -109,63 +107,44 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             build
 
-          if [[ ! -d "${APP_PATH}" ]]; then
-            echo "Build output missing: ${APP_PATH}"
-            exit 1
-          fi
+          [[ -d "${APP_PATH}" ]] || { echo "Build output missing: ${APP_PATH}"; exit 1; }
 
-          echo "==> Signing app bundle"
+          echo "==> Signing"
           codesign \
-            --force \
-            --deep \
-            --options runtime \
-            --timestamp \
+            --force --deep --options runtime --timestamp \
             --sign "${MACOS_SIGNING_IDENTITY}" \
             "${APP_PATH}"
-
           codesign --verify --deep --strict --verbose=2 "${APP_PATH}"
 
-          echo "==> Notarizing app bundle"
-          ditto -c -k --keepParent "${APP_PATH}" "${APP_NOTARY_ZIP}"
-          xcrun notarytool submit "${APP_NOTARY_ZIP}" \
+          echo "==> Zipping signed app"
+          ditto -c -k --keepParent "${APP_PATH}" "${SIGNED_ZIP}"
+          cp "${SIGNED_ZIP}" "${GITHUB_WORKSPACE}/PortPeek-signed.zip"
+
+          echo "==> Submitting for notarization (no-wait)"
+          SUBMIT_OUTPUT=$(xcrun notarytool submit "${SIGNED_ZIP}" \
             --key "${NOTARY_KEY_PATH}" \
             --key-id "${NOTARY_KEY_ID}" \
             --issuer "${NOTARY_ISSUER_ID}" \
-            --wait
-          xcrun stapler staple -v "${APP_PATH}"
-          xcrun stapler validate -v "${APP_PATH}"
+            --no-wait 2>&1)
+          echo "${SUBMIT_OUTPUT}"
 
-          echo "==> Creating notarized release zip"
-          ditto -c -k --keepParent "${APP_PATH}" "${DIST_DIR}/PortPeek.app.zip"
+          SUBMISSION_ID=$(echo "${SUBMIT_OUTPUT}" | grep "  id:" | head -1 | awk '{print $2}')
+          echo "submission_id=${SUBMISSION_ID}" >> "${GITHUB_OUTPUT}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
 
-          STAGING_DIR="${RUNNER_TEMP}/dmg-staging"
-          rm -rf "${STAGING_DIR}"
-          mkdir -p "${STAGING_DIR}"
-          cp -R "${APP_PATH}" "${STAGING_DIR}/"
-          ln -s /Applications "${STAGING_DIR}/Applications"
+          echo "## Build Complete — Notarization Pending" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Field | Value |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "|---|---|" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Submission ID | \`${SUBMISSION_ID}\` |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Version | \`${VERSION}\` |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Run ID | \`${GITHUB_RUN_ID}\` |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Once Apple processes the submission, trigger the **Release Finalize** workflow with these values." >> "${GITHUB_STEP_SUMMARY}"
 
-          hdiutil create \
-            -volname "PortPeek" \
-            -srcfolder "${STAGING_DIR}" \
-            -ov \
-            -format UDZO \
-            "${DIST_DIR}/PortPeek-${VERSION}.dmg"
-
-          echo "==> Notarizing DMG"
-          xcrun notarytool submit "${DIST_DIR}/PortPeek-${VERSION}.dmg" \
-            --key "${NOTARY_KEY_PATH}" \
-            --key-id "${NOTARY_KEY_ID}" \
-            --issuer "${NOTARY_ISSUER_ID}" \
-            --wait
-          xcrun stapler staple -v "${DIST_DIR}/PortPeek-${VERSION}.dmg"
-          xcrun stapler validate -v "${DIST_DIR}/PortPeek-${VERSION}.dmg"
-
-          shasum -a 256 "${DIST_DIR}/PortPeek.app.zip" "${DIST_DIR}/PortPeek-${VERSION}.dmg" > "${DIST_DIR}/SHA256SUMS.txt"
-
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v2
+      - name: Upload Signed App Artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: |
-            dist/PortPeek.app.zip
-            dist/PortPeek-*.dmg
-            dist/SHA256SUMS.txt
+          name: PortPeek-signed-${{ github.ref_name }}
+          path: PortPeek-signed.zip
+          retention-days: 7

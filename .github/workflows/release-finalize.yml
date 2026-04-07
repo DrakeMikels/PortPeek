@@ -1,0 +1,112 @@
+name: Release Finalize
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.0.8)"
+        required: true
+        type: string
+      submission_id:
+        description: "Notarization submission ID from the Release workflow summary"
+        required: true
+        type: string
+      build_run_id:
+        description: "GitHub Actions run ID from the Release workflow (number in the Actions URL)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  finalize:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Wait for Notarization
+        shell: bash
+        env:
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+          NOTARY_API_KEY_P8: ${{ secrets.NOTARY_API_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          NOTARY_KEY_PATH="${RUNNER_TEMP}/AuthKey_${NOTARY_KEY_ID}.p8"
+          printf '%s' "${NOTARY_API_KEY_P8}" > "${NOTARY_KEY_PATH}"
+
+          echo "==> Waiting for submission ${{ inputs.submission_id }}"
+          xcrun notarytool wait "${{ inputs.submission_id }}" \
+            --key "${NOTARY_KEY_PATH}" \
+            --key-id "${NOTARY_KEY_ID}" \
+            --issuer "${NOTARY_ISSUER_ID}"
+
+          echo "==> Notarization result"
+          xcrun notarytool info "${{ inputs.submission_id }}" \
+            --key "${NOTARY_KEY_PATH}" \
+            --key-id "${NOTARY_KEY_ID}" \
+            --issuer "${NOTARY_ISSUER_ID}"
+
+      - name: Download Signed App
+        uses: actions/download-artifact@v4
+        with:
+          name: PortPeek-signed-${{ inputs.tag }}
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Staple, Package, and Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ inputs.tag }}"
+          VERSION="${VERSION#v}"
+          WORK_DIR="${RUNNER_TEMP}/finalize"
+          APP_PATH="${WORK_DIR}/PortPeek.app"
+          DIST_DIR="${GITHUB_WORKSPACE}/dist"
+          mkdir -p "${WORK_DIR}" "${DIST_DIR}"
+
+          echo "==> Extracting signed app"
+          ditto -x -k PortPeek-signed.zip "${WORK_DIR}/"
+
+          echo "==> Stapling notarization ticket"
+          xcrun stapler staple -v "${APP_PATH}"
+          xcrun stapler validate -v "${APP_PATH}"
+
+          echo "==> Creating release zip"
+          ditto -c -k --keepParent "${APP_PATH}" "${DIST_DIR}/PortPeek.app.zip"
+
+          echo "==> Creating DMG"
+          STAGING_DIR="${RUNNER_TEMP}/dmg-staging"
+          mkdir -p "${STAGING_DIR}"
+          cp -R "${APP_PATH}" "${STAGING_DIR}/"
+          ln -s /Applications "${STAGING_DIR}/Applications"
+          hdiutil create \
+            -volname "PortPeek" \
+            -srcfolder "${STAGING_DIR}" \
+            -ov -format UDZO \
+            "${DIST_DIR}/PortPeek-${VERSION}.dmg"
+
+          shasum -a 256 \
+            "${DIST_DIR}/PortPeek.app.zip" \
+            "${DIST_DIR}/PortPeek-${VERSION}.dmg" \
+            > "${DIST_DIR}/SHA256SUMS.txt"
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          files: |
+            dist/PortPeek.app.zip
+            dist/PortPeek-*.dmg
+            dist/SHA256SUMS.txt
