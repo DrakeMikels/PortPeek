@@ -41,6 +41,7 @@ Click the `⚡︎` menu bar icon to see active listeners on your watched ports. 
 - **Copy Host:Port** — copies `localhost:<port>` to your clipboard
 - **Kill Process (SIGTERM)** — gracefully stops the process
 - **Force Kill (SIGKILL)** — immediately terminates it if SIGTERM didn't work
+- **Check for Updates…** — checks the latest GitHub release and opens the release page when a newer version is available
 
 The menu also shows PID, user, and protocol (TCP/UDP) for each active port.
 

@@ -12,12 +12,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private let scanner = PortScanner()
     private let processKiller = ProcessKiller()
+    private let updateChecker = UpdateChecker()
     private let menuBuilder = MenuBuilder()
     private var refreshTimer: Timer?
     private var currentScanResult: ScanResult?
     private var settingsWindowController: SettingsWindowController?
     private var isMenuOpen = false
     private var pendingMenuRefresh = false
+    private var isCheckingForUpdates = false
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         print("🚀 PortPeek: App launched!")
@@ -36,8 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
-            // Use a simple text icon for now (can be replaced with image later)
-            button.title = "⚡︎"
+            configureStatusItemButton(button)
             print("✅ PortPeek: Status item created with button!")
         } else {
             print("❌ PortPeek: Failed to create status item button!")
@@ -64,6 +65,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func statusItemClicked() {
         // Scan on menu open
         performScan()
+    }
+
+    private func configureStatusItemButton(_ button: NSStatusBarButton) {
+        let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        if let image = NSImage(systemSymbolName: "bolt.fill", accessibilityDescription: "PortPeek")?
+            .withSymbolConfiguration(config) {
+            image.isTemplate = true
+            button.image = image
+            button.imagePosition = .imageOnly
+            button.title = ""
+            button.toolTip = "PortPeek"
+            return
+        }
+
+        // Fallback for older symbol rendering failures.
+        button.title = "⚡︎"
     }
     
     // MARK: - Scanning
@@ -128,6 +145,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
+        let updatesItem = NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "")
+        updatesItem.target = self
+        menu.addItem(updatesItem)
+
+        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
         let quitItem = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
@@ -157,6 +182,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let response = alert.runModal()
         completion(response == .alertFirstButtonReturn)
+    }
+
+    private func showUpdateCheckResult(_ result: UpdateCheckResult) {
+        switch result {
+        case .updateAvailable(let currentVersion, let latestVersion, let releaseURL):
+            let alert = NSAlert()
+            alert.messageText = "Update Available"
+
+            var message = "PortPeek \(latestVersion) is available."
+            if let currentVersion {
+                message += "\n\nYou’re running \(currentVersion)."
+            }
+            message += "\n\nIf you installed with Homebrew, run:\nbrew upgrade --cask portpeek\n\nOtherwise open the latest release page to download the update."
+
+            alert.informativeText = message
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "Open Release Page")
+            alert.addButton(withTitle: "OK")
+
+            if alert.runModal() == .alertFirstButtonReturn {
+                NSWorkspace.shared.open(releaseURL)
+            }
+
+        case .upToDate(let currentVersion, _):
+            showAlert(
+                title: "You’re Up to Date",
+                message: "PortPeek \(currentVersion) is the latest published version.",
+                style: .informational
+            )
+
+        case .aheadOfLatest(let currentVersion, let latestVersion):
+            showAlert(
+                title: "Running a Newer Build",
+                message: "This build reports version \(currentVersion), which is newer than the latest published release (\(latestVersion)).",
+                style: .informational
+            )
+        }
     }
 }
 
@@ -223,6 +285,32 @@ extension AppDelegate: MenuBuilderDelegate {
     
     @objc func refreshNow() {
         performScan()
+    }
+
+    @objc func checkForUpdates() {
+        guard !isCheckingForUpdates else { return }
+        isCheckingForUpdates = true
+
+        Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let result = try await updateChecker.checkForUpdates()
+                await MainActor.run {
+                    self.isCheckingForUpdates = false
+                    self.showUpdateCheckResult(result)
+                }
+            } catch {
+                await MainActor.run {
+                    self.isCheckingForUpdates = false
+                    self.showAlert(
+                        title: "Couldn't Check for Updates",
+                        message: error.localizedDescription,
+                        style: .warning
+                    )
+                }
+            }
+        }
     }
     
     @objc func openSettings() {

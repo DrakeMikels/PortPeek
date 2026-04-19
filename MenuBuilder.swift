@@ -231,6 +231,10 @@ class MenuBuilder {
         let refreshItem = NSMenuItem(title: "Refresh Now", action: #selector(MenuBuilderDelegate.refreshNow), keyEquivalent: "r")
         refreshItem.target = delegate
         menu.addItem(refreshItem)
+
+        let updatesItem = NSMenuItem(title: "Check for Updates…", action: #selector(MenuBuilderDelegate.checkForUpdates), keyEquivalent: "")
+        updatesItem.target = delegate
+        menu.addItem(updatesItem)
         
         let settingsItem = NSMenuItem(title: "Settings…", action: #selector(MenuBuilderDelegate.openSettings), keyEquivalent: ",")
         settingsItem.target = delegate
@@ -250,6 +254,7 @@ class MenuBuilder {
     func killProcess(_ sender: NSMenuItem)
     func forceKillProcess(_ sender: NSMenuItem)
     func refreshNow()
+    func checkForUpdates()
     func openSettings()
     func quitApp()
 }

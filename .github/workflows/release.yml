@@ -131,6 +131,8 @@ jobs:
             -scheme PortPeek \
             -configuration Release \
             -derivedDataPath "${DERIVED_DIR}" \
+            MARKETING_VERSION="${VERSION}" \
+            CURRENT_PROJECT_VERSION="${VERSION}" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
