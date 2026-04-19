@@ -1,19 +1,27 @@
 # PortPeek
 
-A macOS menu bar app for monitoring local development ports. See what's running, open it in your browser, or kill it — without leaving the menu bar.
+A macOS menu bar app for monitoring local development ports. See what's running, open it in your browser, or stop stuck listeners without leaving the menu bar.
 
 ## Install
 
+### Homebrew
+
+```bash
+brew install --cask DrakeMikels/tap/portpeek
+```
+
+### Direct Download
+
 1. Download `PortPeek-*.dmg` from the [latest release](../../releases/latest)
-2. Open the DMG and drag PortPeek to Applications
-3. Launch PortPeek — the ⚡︎ icon appears in your menu bar
+2. Open the DMG and drag PortPeek to `/Applications`
+3. Launch PortPeek. The `⚡︎` icon appears in your menu bar
 
 > **macOS 13.5 or later required.**
-> On first launch, macOS may ask you to confirm opening an app downloaded from the internet. This is expected — the app is signed and notarized by Apple.
+> Release builds are signed and notarized.
 
 ## What It Does
 
-Click the ⚡︎ icon to see all active listeners on your watched ports. Each entry shows the port number and process name. Hover over a port for more detail and actions:
+Click the `⚡︎` menu bar icon to see active listeners on your watched ports. Each entry shows the port number and process name. Open an entry to see:
 
 - **Open in Browser** — opens `http://localhost:<port>` in your default browser
 - **Copy Host:Port** — copies `localhost:<port>` to your clipboard
@@ -44,28 +52,22 @@ Use **Reset to Defaults** to restore the original port list and interval.
 
 - Port 5000 is used by macOS ControlCenter on some systems. It will show as active even when you have nothing running on it.
 - A `403` response from "Open in Browser" means the service is running and responded — it just denied the request. Port detection is working correctly.
+- PortPeek is a menu bar app. It does not open a main window during normal use.
 
 ---
 
-## Contributing
+## Build From Source
 
 **Requirements:** macOS 13.5+, Xcode 15+
 
 1. Clone the repo and open `PortPeek.xcodeproj`
 2. Select the `PortPeek` scheme and press `Cmd+R`
 
-### Release Pipeline
+## Contributing
 
-Releases are built, signed, notarized, and published automatically by GitHub Actions when a version tag is pushed.
+Issues and pull requests are welcome.
 
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-See [`packaging/homebrew/README.md`](packaging/homebrew/README.md) for the required secrets setup and Homebrew tap distribution.
-
-### Project Layout
+## Project Layout
 
 | File | Purpose |
 |---|---|
@@ -76,5 +78,8 @@ See [`packaging/homebrew/README.md`](packaging/homebrew/README.md) for the requi
 | `Preferences.swift` | UserDefaults persistence |
 | `PortInfo.swift` | Port data model |
 | `ProcessKiller.swift` | SIGTERM/SIGKILL implementation |
-| `.github/workflows/release.yml` | Automated release workflow |
 | `scripts/` | Local packaging helpers |
+
+## Maintainer Notes
+
+Packaging, signing, notarization, and Homebrew tap notes live in [`packaging/homebrew/README.md`](packaging/homebrew/README.md).
