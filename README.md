@@ -19,6 +19,20 @@ brew install --cask DrakeMikels/tap/portpeek
 > **macOS 13.5 or later required.**
 > Release builds are signed and notarized.
 
+## Screenshots
+
+### Menu Overview
+
+![PortPeek menu overview](docs/screenshots/menu-overview.png)
+
+### Port Actions
+
+![PortPeek port actions submenu](docs/screenshots/port-actions.png)
+
+### Settings
+
+![PortPeek settings window](docs/screenshots/settings-window.png)
+
 ## What It Does
 
 Click the `⚡︎` menu bar icon to see active listeners on your watched ports. Each entry shows the port number and process name. Open an entry to see:
