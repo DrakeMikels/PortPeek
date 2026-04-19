@@ -12,3 +12,11 @@ PortPeek.xcodeproj/xcuserdata/
 prd.md
 DEVLOG.md
 
+# Local secrets / signing materials
+.env
+.env.*
+*.p8
+*.p12
+*.cer
+*.key
+*.mobileprovision
