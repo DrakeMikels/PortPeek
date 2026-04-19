@@ -14,7 +14,7 @@ brew install --cask DrakeMikels/tap/portpeek
 
 1. Download `PortPeek-*.dmg` from the [latest release](../../releases/latest)
 2. Open the DMG and drag PortPeek to `/Applications`
-3. Launch PortPeek. The `⚡︎` icon appears in your menu bar
+3. Launch PortPeek. The PortPeek icon appears in your menu bar
 
 > **macOS 13.5 or later required.**
 > Release builds are signed and notarized.
@@ -35,7 +35,7 @@ brew install --cask DrakeMikels/tap/portpeek
 
 ## What It Does
 
-Click the `⚡︎` menu bar icon to see active listeners on your watched ports. Each entry shows the port number and process name. Open an entry to see:
+Click the PortPeek menu bar icon to see active listeners on your watched ports. Each entry shows the port number and process name. Open an entry to see:
 
 - **Open in Browser** — opens `http://localhost:<port>` in your default browser
 - **Copy Host:Port** — copies `localhost:<port>` to your clipboard
