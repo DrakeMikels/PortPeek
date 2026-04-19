@@ -93,7 +93,3 @@ Issues and pull requests are welcome.
 | `PortInfo.swift` | Port data model |
 | `ProcessKiller.swift` | SIGTERM/SIGKILL implementation |
 | `scripts/` | Local packaging helpers |
-
-## Maintainer Notes
-
-Packaging, signing, notarization, and Homebrew tap notes live in [`packaging/homebrew/README.md`](packaging/homebrew/README.md).
