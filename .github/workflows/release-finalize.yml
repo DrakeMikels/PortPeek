@@ -25,10 +25,40 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - name: Normalize Inputs
+        id: normalize
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG=$(printf '%s' "${{ inputs.tag }}" | sed -E 's/^[[:space:]]*tag:[[:space:]]*//; s#^[[:space:]]*refs/tags/##; s/^[[:space:]]+//; s/[[:space:]]+$//')
+          SUBMISSION_ID=$(printf '%s' "${{ inputs.submission_id }}" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')
+          BUILD_RUN_ID=$(printf '%s' "${{ inputs.build_run_id }}" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')
+
+          if [[ ! "${TAG}" =~ ^v[0-9]+(\.[0-9]+)*$ ]]; then
+            echo "::error::Invalid tag input '${TAG}'. Use a release tag like v1.0.8."
+            exit 1
+          fi
+
+          if [[ ! "${BUILD_RUN_ID}" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid build_run_id '${BUILD_RUN_ID}'. Use the numeric Actions run ID."
+            exit 1
+          fi
+
+          if [[ -z "${SUBMISSION_ID}" ]]; then
+            echo "::error::submission_id is required."
+            exit 1
+          fi
+
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+          echo "submission_id=${SUBMISSION_ID}" >> "${GITHUB_OUTPUT}"
+          echo "build_run_id=${BUILD_RUN_ID}" >> "${GITHUB_OUTPUT}"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: refs/tags/${{ steps.normalize.outputs.tag }}
+          fetch-depth: 1
 
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -46,14 +76,14 @@ jobs:
           NOTARY_KEY_PATH="${RUNNER_TEMP}/AuthKey_${NOTARY_KEY_ID}.p8"
           printf '%s' "${NOTARY_API_KEY_P8}" > "${NOTARY_KEY_PATH}"
 
-          echo "==> Waiting for submission ${{ inputs.submission_id }}"
-          xcrun notarytool wait "${{ inputs.submission_id }}" \
+          echo "==> Waiting for submission ${{ steps.normalize.outputs.submission_id }}"
+          xcrun notarytool wait "${{ steps.normalize.outputs.submission_id }}" \
             --key "${NOTARY_KEY_PATH}" \
             --key-id "${NOTARY_KEY_ID}" \
             --issuer "${NOTARY_ISSUER_ID}"
 
           echo "==> Notarization result"
-          xcrun notarytool info "${{ inputs.submission_id }}" \
+          xcrun notarytool info "${{ steps.normalize.outputs.submission_id }}" \
             --key "${NOTARY_KEY_PATH}" \
             --key-id "${NOTARY_KEY_ID}" \
             --issuer "${NOTARY_ISSUER_ID}"
@@ -61,15 +91,15 @@ jobs:
       - name: Download Signed App
         uses: actions/download-artifact@v4
         with:
-          name: PortPeek-signed-${{ inputs.tag }}
-          run-id: ${{ inputs.build_run_id }}
+          name: PortPeek-signed-${{ steps.normalize.outputs.tag }}
+          run-id: ${{ steps.normalize.outputs.build_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Staple, Package, and Release
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="${{ inputs.tag }}"
+          VERSION="${{ steps.normalize.outputs.tag }}"
           VERSION="${VERSION#v}"
           WORK_DIR="${RUNNER_TEMP}/finalize"
           APP_PATH="${WORK_DIR}/PortPeek.app"
@@ -105,7 +135,7 @@ jobs:
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.tag }}
+          tag_name: ${{ steps.normalize.outputs.tag }}
           files: |
             dist/PortPeek.app.zip
             dist/PortPeek-*.dmg
